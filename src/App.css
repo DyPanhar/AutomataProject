@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=Tiny5&display=swap");
+body {
+  font-family: "Tiny5", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.ch-container {
+  background-color: white;
+  border: 1px solid black;
+  box-shadow: 2px 0px 2px black;
+  font-size: 2.5rem;
+}
+
+.ch-container:hover {
+  transition: 0.5s all;
+  box-shadow: 2px 0px 5px 5px black;
+}
+
+h1 {
+  font-size: 5rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid black;
+  padding: 20px;
+  box-shadow: 2px 5px 5px 2px hsla(0, 13%, 22%, 0.435);
+  border-radius: 10px;
+  font-size: 1.2rem;
+}
+
+input {
+  width: 100%;
+  border-radius: 5px;
+  padding: 5px;
+}
