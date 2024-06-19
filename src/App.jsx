@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import Index from "./DFA/index";
+import Index from ".";
 import Menu from "./Menu";
 
 const App = () => {
@@ -10,6 +10,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Menu />} />
         <Route path="/design-dfa" element={<Index />} />
+        <Route path="/minimizeDFA" />
       </Routes>
     </Router>
   );

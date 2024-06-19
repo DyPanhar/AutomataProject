@@ -1,7 +1,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { DFA } from "./DFA";
+import { DFA } from "./FA/DFA";
 import { Graphviz } from "graphviz-react";
+import { FA } from "./FA/FA";
+import { NFA } from "./FA/NFA";
+import Convert from "./Convert";
+import Minimiz from "./Minimize";
+import { Link } from "react-router-dom";
 const Index = () => {
   const [numState, setNumState] = useState(0);
   const [states, setStates] = useState([]);
@@ -12,7 +17,8 @@ const Index = () => {
   const [transitions, setTransitions] = useState([]);
   const [inputString, setInputString] = useState("");
   const [isAccepted, setIsAccepted] = useState(null);
-  const [dfa, setDfa] = useState(new DFA());
+  const [isNFA, setIsNFA] = useState(null);
+  const [automaton, setAutomaton] = useState(null);
 
   useEffect(() => {
     if (states.length > 0) {
@@ -47,34 +53,60 @@ const Index = () => {
     setTransitions(newTransitions);
   };
 
-  const handleProcessInput = (e) => {
-    e.preventDefault();
-    const result = dfa.processInput(inputString);
-    setIsAccepted(result);
-  };
-
   const handlesubmit = (e) => {
     e.preventDefault();
-    const newDfa = new DFA();
-    states.forEach((state) => newDfa.addState(state));
-    const sortAlphabet = alphabet.sort();
-    sortAlphabet.forEach((syn) => newDfa.addAlphabet(syn.trim()));
-    newDfa.setStartState(startState);
-    const sortedFinalStates = finalState.split(",").sort();
-    sortedFinalStates.forEach((finalState) =>
-      newDfa.setFinalState(finalState.trim())
-    );
-
+    const automaton = new FA();
+    states.forEach((state) => automaton.addState(state));
+    alphabet.forEach((symbol) => automaton.addAlphabet(symbol));
+    automaton.setStartState(startState);
+    finalState
+      .split(",")
+      .forEach((state) => automaton.setFinalState(state.trim()));
     transitions.forEach((transition) => {
-      newDfa.addTransition(
+      automaton.addTransition(
         transition.currentState,
         transition.inputSymbol,
         transition.nextState
       );
     });
+    const newAutomaton = automaton.CheckFA();
+    if (newAutomaton === "DFA") {
+      const dfa = new DFA();
+      states.forEach((state) => dfa.addState(state));
+      alphabet.forEach((symbol) => dfa.addAlphabet(symbol));
+      dfa.setStartState(startState);
+      finalState.split(",").forEach((state) => dfa.setFinalState(state.trim()));
+      transitions.forEach((transition) => {
+        dfa.addTransition(
+          transition.currentState,
+          transition.inputSymbol,
+          transition.nextState
+        );
+      });
+      setAutomaton(dfa);
+      setIsNFA(false);
+    } else {
+      const nfa = new NFA();
+      states.forEach((state) => nfa.addState(state));
+      alphabet.forEach((symbol) => nfa.addAlphabet(symbol));
+      nfa.setStartState(startState);
+      finalState.split(",").forEach((state) => nfa.setFinalState(state.trim()));
+      transitions.forEach((transition) => {
+        nfa.addTransition(
+          transition.currentState,
+          transition.inputSymbol,
+          transition.nextState
+        );
+      });
+      setAutomaton(nfa);
+      setIsNFA(true);
+    }
+  };
 
-    setDfa(newDfa);
-    console.log(newDfa.transitions.q0[0]);
+  const handleProcessInput = (e) => {
+    e.preventDefault();
+    const result = automaton.processInput(inputString);
+    setIsAccepted(result);
   };
   const renderGraphviz = () => {
     const dotString = `
@@ -106,7 +138,15 @@ const Index = () => {
 
   return (
     <>
-      <h1 className="text-center mb-5">DFA Design</h1>
+      <span className="text-center mb-5">
+        {isNFA === null ? (
+          <h1>FA Design</h1>
+        ) : isNFA ? (
+          <h1 className="text-danger">NFA Design</h1>
+        ) : (
+          <h1 className="text-success">DFA Design</h1>
+        )}
+      </span>
       <div className="container d-flex gap-5">
         <form onSubmit={handlesubmit} className="form-container">
           <div className="mb-3">
@@ -159,7 +199,7 @@ const Index = () => {
             />
           </div>
           {transitions.map((_, index) => (
-            <div key={index} className="container">
+            <div key={index}>
               <label>Transition {index + 1} :</label>
               <select
                 value={transitions[index].currentState}
@@ -237,6 +277,7 @@ const Index = () => {
           <div style={{ width: "250px" }}>
             <Graphviz dot={renderGraphviz()} />
           </div>
+          <div>{isNFA === null ? null : isNFA ? <p>hello</p> : <p>hi</p>}</div>
         </div>
       </div>
     </>

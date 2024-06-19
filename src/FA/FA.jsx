@@ -1,4 +1,4 @@
-export class DFA {
+export class FA {
   constructor() {
     this.states = new Set();
     this.alphabet = new Set();
@@ -35,12 +35,15 @@ export class DFA {
     if (
       this.states.has(currentState) &&
       this.states.has(nextState) &&
-      this.alphabet.has(inputSymbol)
+      (this.alphabet.has(inputSymbol) || inputSymbol === "ε")
     ) {
       if (!this.transitions[currentState]) {
         this.transitions[currentState] = {};
       }
-      this.transitions[currentState][inputSymbol] = nextState;
+      if (!this.transitions[currentState][inputSymbol]) {
+        this.transitions[currentState][inputSymbol] = new Set();
+      }
+      this.transitions[currentState][inputSymbol]?.add(nextState);
     } else {
       throw new Error(
         `Invalid transition: ${currentState} --(${inputSymbol})--> ${nextState}`
@@ -48,18 +51,19 @@ export class DFA {
     }
   }
 
-  processInput(input) {
-    let currentState = this.startState;
-    for (const symbol of input) {
-      if (
-        this.transitions[currentState] &&
-        this.transitions[currentState][symbol]
-      ) {
-        currentState = this.transitions[currentState][symbol];
-      } else {
-        return false;
+  CheckFA() {
+    for (const state of this.states) {
+      for (const symbol of this.alphabet) {
+        const newTransitions = this.transitions[state]?.[symbol];
+        const sizeCheck = newTransitions?.size || 0;
+        if (newTransitions && sizeCheck > 1) {
+          return "NFA";
+        }
+      }
+      if (this.transitions[state]?.["ε"]) {
+        return "NFA";
       }
     }
-    return this.finalState.has(currentState);
+    return "DFA";
   }
 }

@@ -8,12 +8,12 @@ const Menu = () => {
       <h1 className="mb-5">Automata Menu</h1>
       <div className="container text-center d-flex flex-column gap-5">
         <Link to="/design-dfa" className="ch-container">
-          Design DFA
+          Design FA
         </Link>
         <Link to="/convert-nfa-to-dfa" className="ch-container">
           Convert NFA to DFA
         </Link>
-        <Link to="/minimize-dfa" className="ch-container">
+        <Link to="/minimizeDFA" className="ch-container">
           Minimize DFA
         </Link>
       </div>
