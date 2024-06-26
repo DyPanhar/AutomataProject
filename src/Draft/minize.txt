@@ -1,0 +1,100 @@
+// Minimize Part
+
+  // Get Reachable States
+  getReachableStates(initialState) {
+    const reachable = new Set([initialState]);
+    const stack = [initialState];
+
+    while (stack.length > 0) {
+      const state = stack.pop();
+      for (const symbol of this.alphabet) {
+        const nextState = this.transitions[state]?.[symbol];
+        if (nextState && !reachable.has(nextState)) {
+          reachable.add(nextState);
+          stack.push(nextState);
+        }
+      }
+    }
+
+    return reachable;
+  }
+
+  partitionStates(reachableStates) {
+    let partitions = [
+      new Set(this.finalState),
+      new Set(
+        [...reachableStates].filter((state) => !this.finalState.has(state))
+      ),
+    ];
+
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const newPartitions = [];
+
+      for (const partition of partitions) {
+        const blocks = this.splitPartition(partition, partitions);
+        newPartitions.push(...blocks);
+        if (blocks.length > 1) {
+          changed = true;
+        }
+      }
+      partitions = newPartitions;
+    }
+
+    return partitions;
+  }
+
+  splitPartition(partition, partitions) {
+    const blocks = {};
+    for (const state of partition) {
+      const key = [...this.alphabet]
+        .map((symbol) => {
+          const nextState = this.transitions[state]?.[symbol];
+          return partitions.findIndex((part) => part.has(nextState));
+        })
+        .join(",");
+      if (!blocks[key]) {
+        blocks[key] = new Set();
+      }
+      blocks[key].add(state);
+    }
+    return Object.values(blocks);
+  }
+
+  constructMinimizedDFA(partitions) {
+    const newDFA = new DFA();
+    const stateMap = {};
+
+    partitions.forEach((partition, index) => {
+      const representative = [...partition][0];
+      const newState = `q${index}`;
+      stateMap[representative] = newState;
+      newDFA.addState(newState);
+      if (this.finalState.has(representative)) {
+        newDFA.setFinalState(newState);
+      }
+      if (this.startState === representative) {
+        newDFA.setStartState(newState);
+      }
+    });
+
+    partitions.forEach((partition) => {
+      const representative = [...partition][0];
+      const newState = stateMap[representative];
+      this.alphabet.forEach((symbol) => {
+        const nextState = this.transitions[representative]?.[symbol];
+        if (nextState !== undefined) {
+          newDFA.addTransition(newState, symbol, stateMap[nextState]);
+        }
+      });
+    });
+
+    return newDFA;
+  }
+
+  minimize() {
+    const reachableStates = this.getReachableStates(this.startState);
+    const partitions = this.partitionStates(reachableStates);
+    return this.constructMinimizedDFA(partitions);
+  }

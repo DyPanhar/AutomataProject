@@ -1,5 +1,11 @@
 import { FA } from "./FA";
+
 export class DFA extends FA {
+  constructor() {
+    super();
+    this.transitions = {};
+  }
+
   addTransition(currentState, inputSymbol, nextState) {
     if (
       this.states.has(currentState) &&
