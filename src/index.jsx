@@ -122,7 +122,7 @@ const Index = () => {
     } else if (!isNFA) {
       toast.warning("It is DFA");
     } else {
-      navigate("/NFAtoDFA");
+      navigate("/NFAtoDFA", { state: automaton });
     }
   };
 
@@ -162,128 +162,133 @@ const Index = () => {
   return (
     <>
       <div className="container-fluid">
-        <span className="text-center mb-5">
+        <span className="text-center mb-5 container-fluid">
           {isNFA === null ? (
-            <h1>FA Design</h1>
+            <h1 className="custom">FA Design</h1>
           ) : isNFA ? (
-            <h1 className="text-danger">NFA Design</h1>
+            <h1 className="text-danger custom">NFA Design</h1>
           ) : (
-            <h1 className="text-success">DFA Design</h1>
+            <h1 className="text-success custom">DFA Design</h1>
           )}
         </span>
-        <div className="container-fluid d-flex gap-4 mt-3">
+        <div className="container-fluid d-flex  mt-3 justify-content-center gap-4">
           <div className=" d-flex flex-column  gap-3">
             <ToastContainer />
-            <button className="btn btn-primary" onClick={checkNFA}>
+            <button className="btn btn-primary box1" onClick={checkNFA}>
               Convert NFA to DFA
             </button>
-            <button className="btn btn-danger" onClick={checkDFA}>
+            <button className="btn btn-danger box2" onClick={checkDFA}>
               Minimize DFA
             </button>
           </div>
-          <form onSubmit={handlesubmit} className="form-container ">
-            <div className="mb-3">
-              <label>State : </label>
-              <input
-                type="number"
-                min={0}
-                value={numState}
-                onChange={(e) => handleNumState(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
-              Alphabet (comma separated):
-              <input
-                type="text"
-                value={alphabet}
-                onChange={(e) => handleAlphabet(e.target.value.split(","))}
-              />
-            </div>
-            <div className="mb-3">
-              Choose Start State :
-              <select
-                name="startState"
-                value={startState}
-                onChange={(e) => setStartState(e.target.value)}
-              >
-                <option value="">Select State</option>
-                {states.map((val, inx) => (
-                  <option value={val} key={inx}>
-                    {val}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-3">
-              Choose Final State :
-              <input
-                type="text"
-                value={finalState}
-                onChange={(e) => setFinalState(e.target.value)}
-              />
-            </div>
-            <div className="mb-3">
-              Transition :
-              <input
-                type="number"
-                value={numTransitions}
-                onChange={handleNumTransitions}
-                min={0}
-              />
-            </div>
-            {transitions.map((_, index) => (
-              <div key={index} className="mt-1">
-                <label>Transition {index + 1} :</label>
+          <div>
+            <form onSubmit={handlesubmit} className="form-container ">
+              <div className="mb-3">
+                <label>State : </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={numState}
+                  onChange={(e) => handleNumState(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                Alphabet (comma separated):
+                <input
+                  type="text"
+                  value={alphabet}
+                  onChange={(e) => handleAlphabet(e.target.value.split(","))}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                Choose Start State :
                 <select
-                  value={transitions[index].currentState}
-                  onChange={(e) =>
-                    handleTransitions(index, "currentState", e.target.value)
-                  }
+                  name="startState"
+                  value={startState}
+                  onChange={(e) => setStartState(e.target.value)}
                 >
-                  <option>Select State</option>
-                  {states.map((state, inx) => (
-                    <option value={state} key={inx}>
-                      {state}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={transitions[index].inputSymbol}
-                  onChange={(e) =>
-                    handleTransitions(index, "inputSymbol", e.target.value)
-                  }
-                  className="mx-2"
-                >
-                  <option>Select Alphabet</option>
-                  {alphabet.map((symbol, inx) => (
-                    <option value={symbol} key={inx}>
-                      {symbol}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={transitions[index].nextState}
-                  onChange={(e) =>
-                    handleTransitions(index, "nextState", e.target.value)
-                  }
-                >
-                  <option>Select Next State</option>
-                  {states.map((state, inx) => (
-                    <option value={state} key={inx}>
-                      {state}
+                  <option value="">Select State</option>
+                  {states.map((val, inx) => (
+                    <option value={val} key={inx}>
+                      {val}
                     </option>
                   ))}
                 </select>
               </div>
-            ))}
-            <button
-              type="submit"
-              className="border border-success rounded-2 mt-4"
-            >
-              Submit
-            </button>
-          </form>
-          <div className=" d-flex flex-column align-items-center justify-content-center">
+              <div className="mb-3">
+                Choose Final State :
+                <input
+                  type="text"
+                  value={finalState}
+                  onChange={(e) => setFinalState(e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                Transition :
+                <input
+                  type="number"
+                  value={numTransitions}
+                  onChange={handleNumTransitions}
+                  min={0}
+                  required
+                />
+              </div>
+              {transitions.map((_, index) => (
+                <div key={index} className="mt-1">
+                  <label>Transition {index + 1} :</label>
+                  <select
+                    value={transitions[index].currentState}
+                    onChange={(e) =>
+                      handleTransitions(index, "currentState", e.target.value)
+                    }
+                  >
+                    <option>Select State</option>
+                    {states.map((state, inx) => (
+                      <option value={state} key={inx}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={transitions[index].inputSymbol}
+                    onChange={(e) =>
+                      handleTransitions(index, "inputSymbol", e.target.value)
+                    }
+                    className="mx-2"
+                  >
+                    <option>Select Alphabet</option>
+                    {alphabet.map((symbol, inx) => (
+                      <option value={symbol} key={inx}>
+                        {symbol}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={transitions[index].nextState}
+                    onChange={(e) =>
+                      handleTransitions(index, "nextState", e.target.value)
+                    }
+                  >
+                    <option>Select Next State</option>
+                    {states.map((state, inx) => (
+                      <option value={state} key={inx}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+              <button
+                type="submit"
+                className="btn btn-success rounded-2 mt-4 box3"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+          <div className=" d-flex flex-column align-items-center ">
             <div className="container">
               <h2 className="text-center">Process Input String</h2>
               <form onSubmit={handleProcessInput} className="d-flex my-2">
@@ -294,7 +299,10 @@ const Index = () => {
                   onChange={(e) => setInputString(e.target.value)}
                   className="float-start"
                 />
-                <button type="submit" className="rounded-2 float-end mx-1">
+                <button
+                  type="submit"
+                  className="btn btn-success rounded-2 float-end mx-1 box3"
+                >
                   Process
                 </button>
               </form>
@@ -309,13 +317,6 @@ const Index = () => {
             <div style={{ width: "250px" }}>
               <Graphviz dot={renderGraphviz()} />
             </div>
-            {/* <div>
-              {isNFA === null ? null : isNFA ? (
-                <p>Convert to DFA</p>
-              ) : (
-                <p>Minimize DFA</p>
-              )}
-            </div> */}
           </div>
         </div>
       </div>
