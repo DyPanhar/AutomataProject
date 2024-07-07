@@ -2,12 +2,6 @@ import { FA } from "./FA";
 
 export class DFA extends FA {
   addTransition(currentState, inputSymbol, nextState) {
-    console.log(
-      `Attempting to add transition: ${currentState} --(${inputSymbol})--> ${nextState}`
-    );
-    console.log("Current States:", this.states);
-    console.log("Current Alphabet:", this.alphabet);
-
     if (
       this.states.has(currentState) &&
       this.states.has(nextState) &&
@@ -17,13 +11,10 @@ export class DFA extends FA {
         this.transitions[currentState] = {};
       }
       this.transitions[currentState][inputSymbol] = nextState;
-      console.log(
-        `Transition added: ${currentState} --(${inputSymbol})--> ${nextState}`
-      );
     } else {
-      const errorMsg = `Invalid transition: ${currentState} --(${inputSymbol})--> ${nextState}`;
-      console.error(errorMsg);
-      throw new Error(errorMsg);
+      throw new Error(
+        `Invalid transition: ${currentState} --(${inputSymbol})--> ${nextState}`
+      );
     }
   }
 
@@ -61,6 +52,7 @@ export class DFA extends FA {
   }
 
   partitionStates(reachableStates) {
+    // Initialize partitions with final and non-final states
     let partitions = [
       new Set(this.finalState),
       new Set(
@@ -68,38 +60,63 @@ export class DFA extends FA {
       ),
     ];
 
+    console.log("Initialize partitions:", partitions);
+
     let changed = true;
     while (changed) {
       changed = false;
       const newPartitions = [];
 
       for (const partition of partitions) {
-        const blocks = this.splitPartition(partition, partitions);
+        const blocks = this.splitPartition(
+          partition,
+          partitions,
+          reachableStates
+        );
         newPartitions.push(...blocks);
         if (blocks.length > 1) {
           changed = true;
         }
       }
+
       partitions = newPartitions;
+      console.log("New partitions:", partitions);
     }
+
+    console.log("Final partitions:", partitions);
     return partitions;
   }
 
-  splitPartition(partition, partitions) {
+  splitPartition(partition, partitions, reachableStates) {
     const blocks = {};
+
     for (const state of partition) {
-      const key = [...this.alphabet]
-        .map((symbol) => {
-          const nextState = this.transitions[state]?.[symbol];
-          return partitions.findIndex((part) => part.has(nextState));
-        })
-        .join(",");
-      if (!blocks[key]) {
-        blocks[key] = new Set();
+      if (!reachableStates.has(state)) {
+        // Skip unreachable states in partitioning
+        continue;
       }
-      blocks[key].add(state);
+
+      const signature = this.getStateSignature(state);
+
+      if (!(signature in blocks)) {
+        blocks[signature] = new Set();
+      }
+      blocks[signature].add(state);
     }
+
     return Object.values(blocks);
+  }
+
+  getStateSignature(state) {
+    const transitions = [];
+
+    // Collect transitions for the current state
+    for (const symbol of this.alphabet) {
+      const nextState = this.transitions[state]?.[symbol] || null;
+      transitions.push(nextState);
+    }
+
+    return transitions.join(",");
   }
 
   constructMinimizedDFA(partitions) {
@@ -182,11 +199,8 @@ export class DFA extends FA {
 
   minimize() {
     const reachableStates = this.getReachableStates(this.startState);
-    // console.log("Reachable States: ", reachableStates);
     const partitions = this.partitionStates(reachableStates);
-    // console.log("Partitions: ", partitions);
     const minimizedDFA = this.constructMinimizedDFA(partitions);
-    console.log("Minimized DFA: ", minimizedDFA);
     return minimizedDFA;
   }
 }
