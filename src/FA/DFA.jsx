@@ -203,8 +203,10 @@ export class DFA extends FA {
   }
 
   minimize() {
-    const reachableStates = this.getReachableStates(this.startState);
-    const partitions = this.partitionStates(reachableStates);
+    // const reachableStates = this.getReachableStates(this.startState);
+    // include unreachable state
+    const states = this.states;
+    const partitions = this.partitionStates(states);
     const minimizedDFA = this.constructMinimizedDFA(partitions);
     return minimizedDFA;
   }
