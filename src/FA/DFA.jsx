@@ -87,16 +87,11 @@ export class DFA extends FA {
     return partitions;
   }
 
-  splitPartition(partition, partitions, reachableStates) {
+  splitPartition(partition, partitions) {
     const blocks = {};
 
     for (const state of partition) {
-      if (!reachableStates.has(state)) {
-        // Skip unreachable states in partitioning
-        continue;
-      }
-
-      const signature = this.getStateSignature(state);
+      const signature = this.getStateSignature(state, partitions);
 
       if (!(signature in blocks)) {
         blocks[signature] = new Set();
@@ -107,18 +102,28 @@ export class DFA extends FA {
     return Object.values(blocks);
   }
 
-  getStateSignature(state) {
+  // Function to get the signature of a state based on its transitions and current partitions
+  getStateSignature(state, partitions) {
     const transitions = [];
 
-    // Collect transitions for the current state
     for (const symbol of this.alphabet) {
       const nextState = this.transitions[state]?.[symbol] || null;
-      transitions.push(nextState);
+      const partitionIndex = this.findPartitionIndex(nextState, partitions);
+      transitions.push(partitionIndex);
     }
 
     return transitions.join(",");
   }
 
+  // Function to find which partition a state belongs to
+  findPartitionIndex(state, partitions) {
+    for (let i = 0; i < partitions.length; i++) {
+      if (partitions[i].has(state)) {
+        return i;
+      }
+    }
+    return null;
+  }
   constructMinimizedDFA(partitions) {
     const newDFA = new DFA();
 
